@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mech Fence - Clôtures Métalliques de Qualité</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
+    <style>
+        /* ---- reset ---- */
+body {
+    margin: 0;
+    font: normal 75% Arial, Helvetica, sans-serif;
+}
+canvas {
+    display: block;
+    vertical-align: bottom;
+}
+/* ---- particles.js container ---- */
+#particles-js {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #160001;
+    background-image: url("");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50% 50%;
+}
+/* ---- stats.js ---- */
+.count-particles {
+    background: #000022;
+    position: absolute;
+    top: 48px;
+    left: 0;
+    width: 80px;
+    color: #13E8E9;
+    font-size: .8em;
+    text-align: left;
+    text-indent: 4px;
+    line-height: 14px;
+    padding-bottom: 2px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
+}
+.js-count-particles {
+    font-size: 1.1em;
+}
+#stats, .count-particles {
+    -webkit-user-select: none;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+#stats {
+    border-radius: 3px 3px 0 0;
+    overflow: hidden;
+}
+.count-particles {
+    border-radius: 0 0 3px 3px;
+}
+
+/* Global Styles */
+        :root {
+            --primary-red: #fffefd;
+            --primary-white: #bc4336;
+            --secondary-red: #c0392b;
+            --dark-gray: #050303;
+            --light-gray: #f5f5f5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #222;
+            background: #f8f9fa;
+        }
+        
+        /* Header Styles */
+        header {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
+            background-color: var(--primary-red);
+        }
+        
+        .logo {
+            height: 150px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            transition: background 0.2s, color 0.2s;
+            padding: 8px 18px;
+            border-radius: 4px;
+        }
+        
+        nav ul li a:hover {
+            background: #bc4336;
+            color: #fff;
+        }
+        
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 450px;
+            background:
+                linear-gradient(rgba(188,67,54,0.55), rgba(0,0,0,0.45)),
+                url('Untitled design.jpg') center center/100% no-repeat;
+            background-color: #160001; /* matches particles.js background */
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: heroFadeIn 2s ease;
+            overflow: hidden;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        @keyframes heroFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(1.04);
+                filter: blur(6px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0);
+            }
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+        
+        .hero .btn {
+            display: inline-block;
+            background-color: var(--primary-red);
+            color: var(--primary-white);
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 30px;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 20px rgba(188,67,54,0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-red);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(188,67,54,0.4);}
+            70% { box-shadow: 0 0 0 10px rgba(188,67,54,0);}
+            100% { box-shadow: 0 0 0 0 rgba(188,67,54,0);}
+        }
+        
+        /* About Section */
+        .section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.7s, transform 0.7s;
+        }
+        
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--primary-red);
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+        
+        /* Make section titles red and visible on white background */
+        #about .section-title,
+        #videos .section-title {
+            color: #bc4336; /* or any dark red you prefer */
+        }
+        
+        #about .about-content {
+            display: block;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 32px 16px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        
+        #about .about-text {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1rem;
+            color: #222;
+            line-height: 1.7;
+            text-align: left;
+            margin: 0;
+        }
+        
+        /* Gallery Section */
+        .gallery {
+            background-color: var(--primary-white);
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            padding: 20px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            height: 250px;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .gallery-item img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(188,67,54,0.15);
+        }
+        
+        /* Videos Section */
+        .videos {
+            background-color: var(--light-gray);
+        }
+        
+        .video-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+        }
+        
+        .video-wrapper {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 16px;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        video {
+            border-radius: 8px;
+            width: 100%;
+            height: auto;
+        }
+        
+        /* Contact Section */
+        .contact {
+            background-color: var(--primary-white);
+        }
+        
+        .contact-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1rem;
+            color: #222;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        
+        .contact-info, .contact-form {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 32px;
+            min-width: 300px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .contact-info h3 {
+            color: var(--primary-red);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .contact-info p {
+            margin-bottom: 15px;
+        }
+        
+        .contact-info i {
+            color: #bc4336;
+            margin-right: 10px;
+        }
+        
+        .phone-number {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .phone-number i {
+            margin-right: 10px;
+            color: var(--primary-red);
+        }
+        
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 18px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .contact-form button {
+            background: #bc4336;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .contact-form button:hover {
+            background: #a83224;
+        }
+        
+        /* Footer */
+        footer {
+            background: #222;
+            color: #fff;
+            text-align: center;
+            padding: 18px 0;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .footer-logo {
+            height: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .social-icons {
+            margin: 20px 0;
+        }
+        
+        .social-icons a {
+            color: var(--primary-white);
+            margin: 0 10px;
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+        
+        .social-icons a:hover {
+            color: var(--primary-red);
+        }
+        
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-red);
+            color: var(--primary-white);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 99;
+        }
+        
+        .back-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .close {
+            position: absolute;
+            top: 30px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10001;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bc4336;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .about-content, .contact-container, .video-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .section {
+                padding: 40px 10px;
+            }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 10px 0;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <img src="WhatsApp Image 2025-06-10 at 21.27.17_d6917573.jpg" alt="Mech Fence Logo" class="logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home">Accueil</a></li>
+                <li><a href="#about">À Propos</a></li>
+                <li><a href="#gallery">Galerie</a></li>
+                <li><a href="#videos">Vidéos</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <h1>Mech Fence - Clôtures Métalliques de Qualité</h1>
+        <p>Fabricant de clôtures métalliques haut de gamme pour une sécurité et une durabilité exceptionnelles.</p>
+        <a href="#contact" class="btn">Contactez-nous</a>
+    </section>
+
+    <!-- About Section -->
+    <section class="section about" id="about" style="background: #fff;">
+        <h2 class="section-title">À Propos de Nous</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <p>Mech Fence est une entreprise spécialisée dans la fabrication et l'installation de clôtures métalliques de haute qualité. Notre expertise nous permet de proposer des solutions sur mesure pour répondre à tous vos besoins en matière de sécurité et de délimitation de propriété.</p>
+                <p>Nous utilisons uniquement des matériaux de première qualité et nos produits sont conçus pour résister aux conditions climatiques les plus extrêmes tout en conservant leur aspect esthétique.</p>
+                <p>Notre équipe de professionnels est à votre écoute pour vous conseiller et vous accompagner dans votre projet, de la conception à l'installation finale.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="section gallery" id="gallery">
+        <h2 class="section-title">Nos Réalisations</h2>
+        <div class="gallery-grid">
+            <!-- 25 fence images -->
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0003.jpg" alt="Clôture Mech Fence 1">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0004.jpg" alt="Clôture Mech Fence 2">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0005.jpg" alt="Clôture Mech Fence 3">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0006.jpg" alt="Clôture Mech Fence 4">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0007.jpg" alt="Clôture Mech Fence 5">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0008.jpg" alt="Clôture Mech Fence 6">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0009.jpg" alt="Clôture Mech Fence 7">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0010.jpg" alt="Clôture Mech Fence 8">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0011.jpg" alt="Clôture Mech Fence 9">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0012.jpg" alt="Clôture Mech Fence 10">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0013.jpg" alt="Clôture Mech Fence 11">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0014.jpg" alt="Clôture Mech Fence 12">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0015.jpg" alt="Clôture Mech Fence 13">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0016.jpg" alt="Clôture Mech Fence 14">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0017.jpg" alt="Clôture Mech Fence 15">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0018.jpg" alt="Clôture Mech Fence 16">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0019.jpg" alt="Clôture Mech Fence 17">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0020.jpg" alt="Clôture Mech Fence 18">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0021.jpg" alt="Clôture Mech Fence 19">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0022.jpg" alt="Clôture Mech Fence 20">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0023.jpg" alt="Clôture Mech Fence 21">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0024.jpg" alt="Clôture Mech Fence 22">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0025.jpg" alt="Clôture Mech Fence 23">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0026.jpg" alt="Clôture Mech Fence 24">
+            </div>
+            <div class="gallery-item">
+                <img src="IMG-20250610-WA0027.jpg" alt="Clôture Mech Fence 25">
+            </div>
+        </div>
+    </section>
+
+    <!-- Videos Section -->
+    <section class="section videos" id="videos">
+        <h2 class="section-title">Nos Vidéos</h2>
+        <div class="video-container">
+            <div class="video-wrapper">
+                <video controls poster="video1-poster.jpg" width="100%">
+                    <source src="WhatsApp Video 2025-06-10 at 18.27.35_6ec2e422.mp4" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
+            </div>
+            <div class="video-wrapper">
+                <video controls poster="video2-poster.jpg" width="100%">
+                    <source src="WhatsApp Video 2025-06-10 at 18.27.35_431ef358.mp4" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section contact" id="contact">
+        <h2 class="section-title">Contactez-nous</h2>
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>Coordonnées</h3>
+                <p>N'hésitez pas à nous contacter pour toute demande d'information ou de devis. Notre équipe est à votre disposition pour répondre à vos questions.</p>
+                <div class="phone-number">
+                    <i class="fas fa-phone-alt" style="color:#bc4336; margin-right:8px;"></i>
+                    <span>+212662740948</span>
+                </div>
+                <div class="phone-number">
+                    <i class="fas fa-phone-alt" style="color:#bc4336; margin-right:8px;"></i>
+                    <span>+212520557357</span>
+                </div>
+                
+                <p><i class="fas fa-envelope"></i> moroccosteelgrillage@gmail.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> al amane GH 40 IMM 304 N 4 ain sebaa 20250 Casablanca</p>
+                
+            </div>
+            <div class="contact-form">
+                <form id="contactForm">
+                <form action="https://formsubmit.co/moroccosteelgrillage@gmail.com" method="POST" class="contact-form">
+    <input type="text" name="name" placeholder="Votre nom" required>
+    <input type="email" name="email" placeholder="Votre email" required>
+    <textarea name="message" placeholder="Votre message" required></textarea>
+    <button type="submit">Envoyer</button>
+</form>    
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="copyright">&copy; 2023 Mech Fence. Tous droits réservés.</p>
+        <p><strong>RC :</strong> 524863</p>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></a>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" style="display:none;">
+        <span class="close" id="closeModal">&times;</span>
+        <img class="modal-content" id="modalImg">
+    </div>
+
+    <!-- Sparks Canvas Background -->
+    <canvas id="sparks-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;"></canvas>
+    <div id="particles-js" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;"></div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://threejs.org/examples/js/libs/stats.min.js"></script>
+    <script>
+particlesJS("particles-js", {
+  "particles": {
+    "number": {
+      "value": 120, // moderate amount
+      "density": { "enable": true, "value_area": 1200 }
+    },
+    "color": { "value": "#ffd700" }, // gold/yellow sparks
+    "shape": {
+      "type": "circle",
+      "stroke": { "width": 0, "color": "#000000" }
+    },
+    "opacity": {
+      "value": 0.8,
+      "random": true,
+      "anim": { "enable": false }
+    },
+    "size": {
+      "value": 3.5, // visible but not huge
+      "random": true,
+      "anim": { "enable": true, "speed": 4, "size_min": 1, "sync": false }
+    },
+    "line_linked": {
+      "enable": false
+    },
+    "move": {
+      "enable": true,
+      "speed": 4, // moderate speed
+      "direction": "top",
+      "random": true,
+      "straight": false,
+      "out_mode": "out",
+      "bounce": false
+    }
+  },
+  "interactivity": {
+    "detect_on": "canvas",
+    "events": {
+      "onhover": { "enable": true, "mode": "repulse" },
+      "onclick": { "enable": true, "mode": "push" },
+      "resize": true
+    },
+    "modes": {
+      "repulse": { "distance": 100, "duration": 0.4 },
+      "push": { "particles_nb": 4 }
+    }
+  },
+  "retina_detect": true
+});
+
+var count_particles, stats, update;
+stats = new Stats;
+stats.setMode(0);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
+count_particles = document.querySelector('.js-count-particles');
+update = function() {
+  stats.begin();
+  stats.end();
+  if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
+    count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
+  }
+  requestAnimationFrame(update);
+};
+requestAnimationFrame(update);
+    </script>
+    <script>
+        // Back to Top Button
+        const backToTopButton = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('active');
+            } else {
+                backToTopButton.classList.remove('active');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Smooth Scrolling for Navigation Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Form Submission
+        const contactForm = document.getElementById('contactForm');
+        
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Here you would typically send the form data to a server
+            // For this example, we'll just show an alert
+            alert('Merci pour votre message! Nous vous contacterons bientôt.');
+            
+            // Reset the form
+            contactForm.reset();
+        });
+        
+        // Gallery Modal Functionality
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        const closeModal = document.getElementById('closeModal');
+        const galleryItems = document.querySelectorAll('.gallery-item img');
+        
+        galleryItems.forEach(img => {
+            img.addEventListener('click', function() {
+                modal.style.display = "block";
+                modalImg.src = this.src;
+                modalImg.alt = this.alt;
+            });
+        });
+        
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        };
+        
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+        
+        // Fade-in sections on scroll
+        const sections = document.querySelectorAll('.section');
+        const showOnScroll = () => {
+            sections.forEach(sec => {
+                const rect = sec.getBoundingClientRect();
+                if(rect.top < window.innerHeight - 100) {
+                    sec.classList.add('visible');
+                }
+            });
+        };
+        window.addEventListener('scroll', showOnScroll);
+        window.addEventListener('DOMContentLoaded', showOnScroll);
+
+        // Sparks Animation Background
+const canvas = document.getElementById('sparks-bg');
+const ctx = canvas.getContext('2d');
+let w = window.innerWidth;
+let h = window.innerHeight;
+canvas.width = w;
+canvas.height = h;
+
+window.addEventListener('resize', () => {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+});
+
+// Mouse interaction
+let mouse = { x: w/2, y: h/2, active: false };
+window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+});
+window.addEventListener('mouseleave', () => {
+    mouse.active = false;
+});
+
+function randomBetween(a, b) {
+    return a + Math.random() * (b - a);
+}
+
+const PARTICLE_COUNT = 60;
+const particles = [];
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+        x: randomBetween(0, w),
+        y: randomBetween(0, h),
+        vx: randomBetween(-2, 2),
+        vy: randomBetween(-2, 2),
+        length: randomBetween(18, 40),
+        alpha: randomBetween(0.7, 1),
+        hue: randomBetween(40, 55), // yellow-orange
+        life: randomBetween(60, 120),
+        maxLife: randomBetween(60, 120)
+    });
+}
+
+function drawSpark(p) {
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.strokeStyle = `hsl(${p.hue}, 100%, 60%)`;
+    ctx.shadowColor = `hsl(${p.hue}, 100%, 70%)`;
+    ctx.shadowBlur = 18;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x - p.vx * p.length, p.y - p.vy * p.length);
+    ctx.stroke();
+    ctx.restore();
+}
+
+function animate() {
+    ctx.clearRect(0, 0, w, h);
+    for (let p of particles) {
+        // Interactivity: attract to mouse
+        if (mouse.active) {
+            let dx = mouse.x - p.x;
+            let dy = mouse.y - p.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 150) {
+                p.vx += dx / dist * 0.08;
+                p.vy += dy / dist * 0.08;
+            }
+        }
+        // Move
+        p.x += p.vx;
+        p.y += p.vy;
+        // Fade out and respawn
+        p.life--;
+        if (p.life <= 0 || p.x < 0 || p.x > w || p.y < 0 || p.y > h) {
+            p.x = randomBetween(0, w);
+            p.y = randomBetween(0, h);
+            p.vx = randomBetween(-2, 2);
+            p.vy = randomBetween(-2, 2);
+            p.length = randomBetween(18, 40);
+            p.alpha = randomBetween(0.7, 1);
+            p.hue = randomBetween(40, 55);
+            p.life = p.maxLife = randomBetween(60, 120);
+        }
+        // Draw
+        drawSpark(p);
+    }
+    requestAnimationFrame(animate);
+}
+animate();
+    </script>
+</body>
+</html>
