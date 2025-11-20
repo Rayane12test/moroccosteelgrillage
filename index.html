@@ -340,6 +340,32 @@ canvas {
             overflow-y: auto;
             max-height: calc(60vh - 44px);
         }
+        .ad-featured {
+            padding: 10px;
+            display:flex;
+            gap:10px;
+            align-items:center;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            background: linear-gradient(180deg, rgba(188,67,54,0.02), transparent);
+        }
+        .ad-featured img { width:84px; height:56px; object-fit:cover; border-radius:8px; }
+        .featured-meta { display:flex; flex-direction:column; gap:6px; }
+        .featured-title { font-weight:800; color:#222; font-size:0.95rem; }
+        .featured-cta button { background:#bc4336; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700; }
+
+        /* First-visit ad modal styles */
+        .first-ad-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:20000; }
+        .first-ad-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); }
+        .first-ad-content { position:relative; max-width:920px; width:92%; background:linear-gradient(180deg,#fff,#fff); border-radius:12px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; gap:12px; z-index:20001; }
+        .first-ad-close { position:absolute; right:12px; top:8px; background:transparent; border:none; font-size:26px; cursor:pointer; color:#333; }
+        .first-ad-img { width:100%; height:auto; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.12); }
+        .first-ad-actions { display:flex; gap:12px; margin-top:6px; }
+        .first-ad-actions .btn { padding:10px 16px; border-radius:8px; }
+
+        /* When opening the image modal from the featured ad, use first-ad style */
+        .modal.first-style { display:flex; align-items:center; justify-content:center; }
+        .modal.first-style .modal-content { max-width:920px; width:92%; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+        .modal.first-style .close { color:#fff; right:18px; top:18px; }
         .ad-item {
             display:flex;
             gap:10px;
@@ -661,10 +687,21 @@ canvas {
     <aside id="adsPanel" class="ads-panel" aria-label="Annonces">
         <div class="ads-header">
             <strong>Annonces</strong>
-            <button id="toggleAds" class="ads-toggle" title="Réduire/agrandir">−</button>
         </div>
-        <div id="adsList" class="ads-list"></div>
+        <!-- Featured ad (ads.jpg) only -->
+        <div class="ad-featured" id="featuredAd">
+            <img src="ads.jpg" alt="Annonce" id="featuredAdImg">
+            <div class="featured-meta">
+                <div class="featured-title">Offre spéciale</div>
+                <div class="featured-cta"><button id="featuredBtn">Voir l'annonce</button></div>
+            </div>
+        </div>
     </aside>
+
+    <!-- Small banner under hero for the featured ad -->
+    <div id="heroAdBanner" style="display:flex;justify-content:center;padding:12px;background:transparent;">
+        <img src="ads.jpg" alt="Annonce" id="heroAdImg" style="max-width:920px;width:90%;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);cursor:pointer;" loading="lazy">
+    </div>
 
     <!-- About Section -->
     <section class="section about" id="about" style="background: #fff;">
@@ -863,6 +900,10 @@ canvas {
                 <p>N'hésitez pas à nous contacter pour toute demande d'information ou de devis. Notre équipe est à votre disposition pour répondre à vos questions.</p>
                 <div class="phone-number">
                     <i class="fas fa-phone-alt" style="color:#bc4336; margin-right:8px;"></i>
+                    <span style="color:inherit; text-decoration:none; font-weight:700;">+212659823894</span>
+                </div>
+                <div class="phone-number">
+                    <i class="fas fa-phone-alt" style="color:#bc4336; margin-right:8px;"></i>
                     <span>+212662740948</span>
                 </div>
                 <div class="phone-number">
@@ -898,6 +939,19 @@ canvas {
     <div id="imageModal" class="modal" style="display:none;">
         <span class="close" id="closeModal">&times;</span>
         <img class="modal-content" id="modalImg">
+    </div>
+
+    <!-- First-visit Ad Modal (shows once) -->
+    <div id="firstVisitAd" class="first-ad-modal" style="display:none;" aria-hidden="true">
+        <div class="first-ad-backdrop"></div>
+        <div class="first-ad-content">
+            <button id="firstAdClose" class="first-ad-close" aria-label="Fermer">×</button>
+            <img src="ads.jpg" alt="Annonce" class="first-ad-img">
+            <div class="first-ad-actions">
+                <button id="firstAdView" class="btn">Voir l'annonce</button>
+                <button id="firstAdNever" class="btn" style="background:#eee;color:#333;">Ne plus afficher</button>
+            </div>
+        </div>
     </div>
 
     <!-- Sparks Canvas Background -->
@@ -1038,11 +1092,20 @@ requestAnimationFrame(update);
         });
         
         closeModal.onclick = function() {
+            // if modal was opened in first-ad style, mark as seen
+            if (modal.classList.contains('first-style')) {
+                try { localStorage.setItem('seenFirstAd', '1'); } catch(e){}
+                modal.classList.remove('first-style');
+            }
             modal.style.display = "none";
         };
         
         window.onclick = function(event) {
             if (event.target === modal) {
+                if (modal.classList.contains('first-style')) {
+                    try { localStorage.setItem('seenFirstAd', '1'); } catch(e){}
+                    modal.classList.remove('first-style');
+                }
                 modal.style.display = "none";
             }
         };
@@ -1101,78 +1164,67 @@ requestAnimationFrame(update);
         const savedCategory = (function(){ try { return localStorage.getItem('galleryCategory'); } catch(e){ return null; }})();
         showCategory(savedCategory || 'fences');
 
-        // Ads panel: show filenames as clickable ads
-        const ads = [
-            "chair.jpg","chair 2.jpg","lockers.jpg","lockers 2.jpg","door.jpg","doors.jpg",
-            "factory.jpg","machine.jpg","machine 2.jpg","machine 6.jpg",
-            "stairs 2.jpg","stairss.jpg","table.jpg","table 1.jpg","table 2.jpg","table 3.jpg","table2.jpg","trashcan.jpg",
-            "Untitled design.jpg","WhatsApp Image 2025-06-10 at 21.27.17_d6917573.jpg"
-        ];
+        // Ads panel simplified: only featured ad shown (ads.jpg)
 
-        function detectCategoryFromName(name) {
-            const n = name.toLowerCase();
-            if (/grillage|img-|grillag|grillage/.test(n)) return 'Clôtures';
-            if (/chair|chaise|lock|locker|door|port|porte/.test(n)) return 'Chaises/Portes';
-            return 'Autres';
+        // Featured ad click handlers (open the same image modal)
+        const featuredImg = document.getElementById('featuredAdImg');
+        const featuredBtn = document.getElementById('featuredBtn');
+        const heroAdImg = document.getElementById('heroAdImg');
+
+        function openImageModal(src, alt, useFirstStyle = false) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            if (useFirstStyle) {
+                modal.classList.add('first-style');
+            } else {
+                modal.classList.remove('first-style');
+            }
+            modal.style.display = 'block';
+            modalImg.src = src;
+            modalImg.alt = alt || '';
         }
 
-        const adsList = document.getElementById('adsList');
-        const adsToggle = document.getElementById('toggleAds');
-        let adsCollapsed = false;
+        // Facebook page URL for the ad image click (change as needed)
+        const fbPageUrl = 'https://www.facebook.com/profile.php?id=61573817109921';
 
-        function renderAds() {
-            adsList.innerHTML = '';
-            ads.forEach(fn => {
-                const item = document.createElement('div');
-                item.className = 'ad-item';
-                item.title = fn;
+        // Clicking the featured image or hero banner opens the Facebook page in a new tab
+        if (featuredImg) featuredImg.addEventListener('click', () => window.open(fbPageUrl, '_blank', 'noopener'));
+        if (heroAdImg) heroAdImg.addEventListener('click', () => window.open(fbPageUrl, '_blank', 'noopener'));
 
-                const img = document.createElement('img');
-                img.className = 'ad-thumb';
-                img.src = fn;
-                img.alt = fn;
-                img.loading = 'lazy';
+        // Make the CTA button open the Facebook page as well (announcement behavior)
+        if (featuredBtn) featuredBtn.addEventListener('click', () => window.open(fbPageUrl, '_blank', 'noopener'));
 
-                const meta = document.createElement('div');
-                meta.className = 'ad-meta';
-                const title = document.createElement('div');
-                title.className = 'ad-title';
-                title.textContent = fn;
-                const sub = document.createElement('div');
-                sub.className = 'ad-sub';
-                sub.textContent = detectCategoryFromName(fn);
+        // First-visit ad modal: show once per browser using localStorage
+        const firstVisitModal = document.getElementById('firstVisitAd');
+        const firstAdClose = document.getElementById('firstAdClose');
+        const firstAdView = document.getElementById('firstAdView');
+        const firstAdNever = document.getElementById('firstAdNever');
 
-                const badge = document.createElement('div');
-                badge.className = 'ad-badge';
-                badge.textContent = 'Annonce';
-
-                meta.appendChild(title);
-                meta.appendChild(sub);
-
-                item.appendChild(img);
-                item.appendChild(meta);
-                item.appendChild(badge);
-
-                // on click: open modal (reuse existing modal)
-                item.addEventListener('click', () => {
-                    const modal = document.getElementById('imageModal');
-                    const modalImg = document.getElementById('modalImg');
-                    modal.style.display = 'block';
-                    modalImg.src = fn;
-                    modalImg.alt = fn;
-                });
-
-                adsList.appendChild(item);
-            });
+        function showFirstAdOnce() {
+            try {
+                const seen = localStorage.getItem('seenFirstAd');
+                if (!seen) {
+                    // open the main image modal using the same first-ad style
+                    openImageModal('ads.jpg', 'Annonce', true);
+                }
+            } catch (e) {
+                // ignore localStorage errors
+            }
         }
 
-        adsToggle.addEventListener('click', () => {
-            adsCollapsed = !adsCollapsed;
-            document.getElementById('adsList').style.display = adsCollapsed ? 'none' : '';
-            adsToggle.textContent = adsCollapsed ? '+' : '−';
-        });
+        function hideFirstAd(markSeen = true) {
+            if (firstVisitModal) {
+                firstVisitModal.style.display = 'none';
+                firstVisitModal.setAttribute('aria-hidden', 'true');
+            }
+            try { if (markSeen) localStorage.setItem('seenFirstAd', '1'); } catch(e){}
+        }
 
-        renderAds();
+        if (firstAdClose) firstAdClose.addEventListener('click', () => hideFirstAd(true));
+        if (firstAdNever) firstAdNever.addEventListener('click', () => hideFirstAd(true));
+        if (firstAdView) firstAdView.addEventListener('click', () => { hideFirstAd(true); openImageModal('ads.jpg','Annonce', true); });
+
+        window.addEventListener('DOMContentLoaded', showFirstAdOnce);
 
         // Sparks Animation Background
 const canvas = document.getElementById('sparks-bg');
