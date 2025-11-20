@@ -259,6 +259,106 @@ canvas {
         .gallery {
             background-color: var(--primary-white);
         }
+
+        /* Category bar */
+        .category-bar {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .category-buttons {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .category-btn {
+            background: #fff;
+            color: #222;
+            border: 2px solid rgba(188,67,54,0.12);
+            padding: 10px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .category-btn:hover {
+            transform: translateY(-3px);
+        }
+        .category-btn.active {
+            background: #bc4336;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(188,67,54,0.18);
+            border-color: rgba(188,67,54,0.25);
+        }
+        .category-btn .badge {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+        .category-description {
+            margin-top: 8px;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* Ads Panel */
+        .ads-panel {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            width: 280px;
+            max-height: 60vh;
+            background: rgba(255,255,255,0.98);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            overflow: hidden;
+            z-index: 1500;
+            font-size: 0.95rem;
+        }
+        .ads-header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            background: linear-gradient(90deg, rgba(188,67,54,0.06), rgba(188,67,54,0.02));
+        }
+        .ads-toggle {
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .ads-list {
+            padding: 8px;
+            overflow-y: auto;
+            max-height: calc(60vh - 44px);
+        }
+        .ad-item {
+            display:flex;
+            gap:10px;
+            align-items:center;
+            padding:8px;
+            border-radius:8px;
+            cursor:pointer;
+            transition: background 0.12s, transform 0.08s;
+        }
+        .ad-item:hover { background: rgba(188,67,54,0.04); transform: translateY(-2px); }
+        .ad-thumb { width:56px; height:40px; object-fit:cover; border-radius:6px; }
+        .ad-meta { flex:1; display:flex; flex-direction:column; }
+        .ad-title { font-weight:700; color:#222; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .ad-sub { font-size:0.8rem; color:#666; margin-top:4px; }
+        .ad-badge { background:#f0f0f0; color:#333; padding:4px 6px; border-radius:999px; font-size:0.75rem; }
+
+        @media (max-width: 900px) {
+            .ads-panel { right: 12px; left: 12px; width: auto; max-height: 40vh; }
+        }
         
         .gallery-grid {
             display: grid;
@@ -552,10 +652,19 @@ canvas {
 
     <!-- Hero Section -->
     <section class="hero" id="home">
-        <h1>Morocco Steel Grillage<h1>
+        <h1>Morocco Steel Grillage</h1>
         <p>Fabricant de clôtures métalliques haut de gamme pour une sécurité et une durabilité exceptionnelles.</p>
         <a href="#contact" class="btn">Contactez-nous</a>
     </section>
+
+    <!-- Ads Panel -->
+    <aside id="adsPanel" class="ads-panel" aria-label="Annonces">
+        <div class="ads-header">
+            <strong>Annonces</strong>
+            <button id="toggleAds" class="ads-toggle" title="Réduire/agrandir">−</button>
+        </div>
+        <div id="adsList" class="ads-list"></div>
+    </aside>
 
     <!-- About Section -->
     <section class="section about" id="about" style="background: #fff;">
@@ -572,7 +681,17 @@ canvas {
     <!-- Gallery Section -->
     <section class="section gallery" id="gallery">
         <h2 class="section-title">Nos Réalisations</h2>
-        <div class="gallery-grid">
+        <div class="category-bar">
+            <div class="category-buttons">
+                <button id="btnFences" class="category-btn">Clôtures & Portails <span class="badge">31</span></button>
+                <button id="btnChairs" class="category-btn">Chaises & Casiers <span class="badge">6</span></button>
+                <button id="btnOthers" class="category-btn">Autres <span class="badge">12</span></button>
+            </div>
+            <p id="categoryDesc" class="category-description">Clôtures, portails et protections métalliques.</p>
+        </div>
+
+        <!-- Fences grid -->
+        <div id="gridFences" class="gallery-grid">
             <!-- 25 fence images -->
             <div class="gallery-item">
                 <img src="IMG-20250610-WA0003.jpg" alt="Clôture Mech Fence 1">
@@ -650,6 +769,70 @@ canvas {
                 <img src="IMG-20250610-WA0027.jpg" alt="Clôture Mech Fence 25">
             </div>
         </div>
+
+        <!-- Chairs & Lockers grid (initially hidden if empty) -->
+        <div id="gridChairs" class="gallery-grid" style="display:none;">
+            <!-- Actual chair/locker/door images from the repo -->
+            <div class="gallery-item">
+                <img src="chair.jpg" alt="Chaise" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="chair 2.jpg" alt="Chaise 2" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="lockers.jpg" alt="Casier" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="lockers 2.jpg" alt="Casier 2" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="door.jpg" alt="Porte" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="doors.jpg" alt="Portes" loading="lazy">
+            </div>
+        </div>
+
+        <!-- Other items grid -->
+        <div id="gridOthers" class="gallery-grid" style="display:none;">
+            <!-- Misc images that are not fences/doors/lockers -->
+            <div class="gallery-item">
+                <img src="factory.jpg" alt="Usine" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="machine.jpg" alt="Machine" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="machine 2.jpg" alt="Machine 2" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="machine 6.jpg" alt="Machine 6" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="stairs 2.jpg" alt="Escalier" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="stairss.jpg" alt="Escaliers" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="table.jpg" alt="Table" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="table 1.jpg" alt="Table 1" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="table 2.jpg" alt="Table 2" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="table 3.jpg" alt="Table 3" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="table2.jpg" alt="Table variante" loading="lazy">
+            </div>
+            <div class="gallery-item">
+                <img src="trashcan.jpg" alt="Poubelle" loading="lazy">
+            </div>
+        </div>
     </section>
 
     <!-- Videos Section -->
@@ -692,13 +875,11 @@ canvas {
                 
             </div>
             <div class="contact-form">
-                <form id="contactForm">
-                <form action="https://formsubmit.co/moroccosteelgrillage@gmail.com" method="POST" class="contact-form">
-    <input type="text" name="name" placeholder="Votre nom" required>
-    <input type="email" name="email" placeholder="Votre email" required>
-    <textarea name="message" placeholder="Votre message" required></textarea>
-    <button type="submit">Envoyer</button>
-</form>    
+                <form id="contactForm" action="https://formsubmit.co/moroccosteelgrillage@gmail.com" method="POST" class="contact-form">
+                    <input type="text" name="name" placeholder="Votre nom" required>
+                    <input type="email" name="email" placeholder="Votre email" required>
+                    <textarea name="message" placeholder="Votre message" required></textarea>
+                    <button type="submit">Envoyer</button>
                 </form>
             </div>
         </div>
@@ -878,6 +1059,120 @@ requestAnimationFrame(update);
         };
         window.addEventListener('scroll', showOnScroll);
         window.addEventListener('DOMContentLoaded', showOnScroll);
+
+        // Gallery category toggle (Clôtures vs Chaises & Casiers vs Autres)
+        const btnFences = document.getElementById('btnFences');
+        const btnChairs = document.getElementById('btnChairs');
+        const btnOthers = document.getElementById('btnOthers');
+        const gridFences = document.getElementById('gridFences');
+        const gridChairs = document.getElementById('gridChairs');
+        const gridOthers = document.getElementById('gridOthers');
+        const categoryDesc = document.getElementById('categoryDesc');
+
+        function setActiveButton(button) {
+            [btnFences, btnChairs, btnOthers].forEach(b => b.classList.remove('active'));
+            if (button) button.classList.add('active');
+            if (button === btnChairs) {
+                categoryDesc.textContent = 'Chaises, casiers et mobilier métallique.';
+            } else if (button === btnOthers) {
+                categoryDesc.textContent = 'Machines, tables, escaliers et autres réalisations.';
+            } else {
+                categoryDesc.textContent = 'Clôtures, portails et protections métalliques.';
+            }
+        }
+
+        function showCategory(cat) {
+            gridFences.style.display = (cat === 'fences' ? '' : 'none');
+            gridChairs.style.display = (cat === 'chairs' ? '' : 'none');
+            gridOthers.style.display = (cat === 'others' ? '' : 'none');
+
+            if (cat === 'chairs') setActiveButton(btnChairs);
+            else if (cat === 'others') setActiveButton(btnOthers);
+            else setActiveButton(btnFences);
+
+            try { localStorage.setItem('galleryCategory', cat); } catch(e) {}
+        }
+
+        btnFences.addEventListener('click', () => showCategory('fences'));
+        btnChairs.addEventListener('click', () => showCategory('chairs'));
+        btnOthers.addEventListener('click', () => showCategory('others'));
+
+        // Initialize from saved preference (defaults to fences)
+        const savedCategory = (function(){ try { return localStorage.getItem('galleryCategory'); } catch(e){ return null; }})();
+        showCategory(savedCategory || 'fences');
+
+        // Ads panel: show filenames as clickable ads
+        const ads = [
+            "chair.jpg","chair 2.jpg","lockers.jpg","lockers 2.jpg","door.jpg","doors.jpg",
+            "factory.jpg","machine.jpg","machine 2.jpg","machine 6.jpg",
+            "stairs 2.jpg","stairss.jpg","table.jpg","table 1.jpg","table 2.jpg","table 3.jpg","table2.jpg","trashcan.jpg",
+            "Untitled design.jpg","WhatsApp Image 2025-06-10 at 21.27.17_d6917573.jpg"
+        ];
+
+        function detectCategoryFromName(name) {
+            const n = name.toLowerCase();
+            if (/grillage|img-|grillag|grillage/.test(n)) return 'Clôtures';
+            if (/chair|chaise|lock|locker|door|port|porte/.test(n)) return 'Chaises/Portes';
+            return 'Autres';
+        }
+
+        const adsList = document.getElementById('adsList');
+        const adsToggle = document.getElementById('toggleAds');
+        let adsCollapsed = false;
+
+        function renderAds() {
+            adsList.innerHTML = '';
+            ads.forEach(fn => {
+                const item = document.createElement('div');
+                item.className = 'ad-item';
+                item.title = fn;
+
+                const img = document.createElement('img');
+                img.className = 'ad-thumb';
+                img.src = fn;
+                img.alt = fn;
+                img.loading = 'lazy';
+
+                const meta = document.createElement('div');
+                meta.className = 'ad-meta';
+                const title = document.createElement('div');
+                title.className = 'ad-title';
+                title.textContent = fn;
+                const sub = document.createElement('div');
+                sub.className = 'ad-sub';
+                sub.textContent = detectCategoryFromName(fn);
+
+                const badge = document.createElement('div');
+                badge.className = 'ad-badge';
+                badge.textContent = 'Annonce';
+
+                meta.appendChild(title);
+                meta.appendChild(sub);
+
+                item.appendChild(img);
+                item.appendChild(meta);
+                item.appendChild(badge);
+
+                // on click: open modal (reuse existing modal)
+                item.addEventListener('click', () => {
+                    const modal = document.getElementById('imageModal');
+                    const modalImg = document.getElementById('modalImg');
+                    modal.style.display = 'block';
+                    modalImg.src = fn;
+                    modalImg.alt = fn;
+                });
+
+                adsList.appendChild(item);
+            });
+        }
+
+        adsToggle.addEventListener('click', () => {
+            adsCollapsed = !adsCollapsed;
+            document.getElementById('adsList').style.display = adsCollapsed ? 'none' : '';
+            adsToggle.textContent = adsCollapsed ? '+' : '−';
+        });
+
+        renderAds();
 
         // Sparks Animation Background
 const canvas = document.getElementById('sparks-bg');
